@@ -3,20 +3,23 @@
 namespace CapaLogicaNegocioSF
 {
     /// <summary>
-    /// Crea las conexiones a SQL Express.
+    /// Crea las conexiones a SQL Server.
     /// </summary>
     public class clsConexionSQLSF
     {
-        // Si cambia el servidor, solo se edita esta línea
-        private const string cStrCadenaConexionSF =
-            "Server=localhost;Database=SurtiFacilDB;Trusted_Connection=True;TrustServerCertificate=True;";
+        // En caso de estar usando otra instancia (ej: localhost o .\SQLEXPRESS), modificar solo esta constante
+        private const string cStrServidorSF = "localhost";
+        public const string cStrBaseDatosSF = "SurtiFacilDB";
+        private const string cStrAutenticacionSF = "Trusted_Connection=True;TrustServerCertificate=True;";
 
-        /// <summary>
-        /// Devuelve una conexión nueva, todavía cerrada.
-        /// </summary>
         public SqlConnection CrearConexion()
         {
-            return new SqlConnection(cStrCadenaConexionSF);
+            return new SqlConnection("Server=" + cStrServidorSF + ";Database=" + cStrBaseDatosSF + ";" + cStrAutenticacionSF);
+        }
+
+        public SqlConnection CrearConexionMaster()
+        {
+            return new SqlConnection("Server=" + cStrServidorSF + ";Database=master;" + cStrAutenticacionSF);
         }
     }
 }

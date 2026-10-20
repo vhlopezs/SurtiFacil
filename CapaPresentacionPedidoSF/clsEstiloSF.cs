@@ -1,116 +1,82 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-using CapaEntidadesSF;
 
 namespace CapaPresentacionPedidoSF
 {
-    /// <summary>
-    /// Colores y fuentes de la pantalla. Cambiar aquí cambia todo.
-    /// </summary>
     public static class clsEstiloSF
     {
-        // Colores
-        public static readonly Color gColorFondo = Color.FromArgb(235, 235, 235);
-        public static readonly Color gColorBarraOscura = Color.FromArgb(45, 45, 45);
-        public static readonly Color gColorTextoClaro = Color.White;
-        public static readonly Color gColorTextoOscuro = Color.FromArgb(30, 30, 30);
-        public static readonly Color gColorBoton = Color.FromArgb(70, 70, 70);
-        public static readonly Color gColorFilaAlterna = Color.FromArgb(245, 245, 245);
-        public static readonly Color gColorFilaConPedido = Color.FromArgb(205, 205, 205);
-
-        // Fuentes
-        public static readonly Font gFuenteNormal = new Font("Segoe UI", 10F);
-        public static readonly Font gFuenteEmpresa = new Font("Segoe UI", 16F, FontStyle.Bold);
-        public static readonly Font gFuenteTitulo = new Font("Segoe UI", 12F, FontStyle.Bold);
-
-        /// <summary>
-        /// Aplica el estilo a todo el formulario.
-        /// </summary>
-        public static void AplicarEstilo(Form pFrmFormularioSF)
+        public static void AplicarEstilo(Form pFormSF)
         {
-            pFrmFormularioSF.BackColor = gColorFondo;
-            pFrmFormularioSF.ForeColor = gColorTextoOscuro;
-            pFrmFormularioSF.Font = gFuenteNormal;
+            pFormSF.BackColor = Color.FromArgb(245, 246, 248);
 
-            EstilizarControles(pFrmFormularioSF);
+            foreach (Control lControlSF in pFormSF.Controls)
+            {
+                AplicarEstiloControl(lControlSF);
+            }
         }
 
-        /// <summary>
-        /// Resalta las filas que sí tienen pedido sugerido.
-        /// </summary>
-        public static void ResaltarFilasConPedido(DataGridView pGrdGrillaSF)
+        private static void AplicarEstiloControl(Control pControlSF)
         {
-            foreach (DataGridViewRow lFilaSF in pGrdGrillaSF.Rows)
+            if (pControlSF is Label lLblSF)
             {
-                clsPedidoSugeridoEN lEntPedidoSF = (clsPedidoSugeridoEN)lFilaSF.DataBoundItem;
-
-                if (lEntPedidoSF.gIntCantidadPedidoSugerido > 0)
+                if (lLblSF.Name == "lblTitulo")
                 {
-                    lFilaSF.DefaultCellStyle.BackColor = gColorFilaConPedido;
+                    lLblSF.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+                    lLblSF.ForeColor = Color.FromArgb(30, 30, 30);
+                }
+                else
+                {
+                    lLblSF.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+                    lLblSF.ForeColor = Color.FromArgb(50, 50, 50);
+                }
+            }
+            else if (pControlSF is Button lBtnSF)
+            {
+                lBtnSF.FlatStyle = FlatStyle.Flat;
+                lBtnSF.FlatAppearance.BorderSize = 0;
+                lBtnSF.BackColor = Color.FromArgb(52, 73, 94);
+                lBtnSF.ForeColor = Color.White;
+                lBtnSF.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                lBtnSF.Cursor = Cursors.Hand;
+            }
+            else if (pControlSF is DataGridView lDgvSF)
+            {
+                lDgvSF.BackgroundColor = Color.White;
+                lDgvSF.BorderStyle = BorderStyle.None;
+                lDgvSF.EnableHeadersVisualStyles = false;
+                lDgvSF.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(44, 62, 80);
+                lDgvSF.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+                lDgvSF.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                lDgvSF.ColumnHeadersHeight = 35;
+                lDgvSF.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+                lDgvSF.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
+                lDgvSF.DefaultCellStyle.SelectionForeColor = Color.White;
+                lDgvSF.RowTemplate.Height = 28;
+                lDgvSF.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            }
+
+            if (pControlSF.HasChildren)
+            {
+                foreach (Control lHijoSF in pControlSF.Controls)
+                {
+                    AplicarEstiloControl(lHijoSF);
                 }
             }
         }
 
-        /// <summary>
-        /// Recorre los controles y aplica el estilo según su nombre o tipo.
-        /// </summary>
-        private static void EstilizarControles(Control pCtlPadreSF)
+        public static void ResaltarFilasConPedido(DataGridView pDgvSF)
         {
-            foreach (Control lCtlHijoSF in pCtlPadreSF.Controls)
+            foreach (DataGridViewRow lFilaSF in pDgvSF.Rows)
             {
-                if (lCtlHijoSF.Name == "pnlEncabezado")
+                if (lFilaSF.Cells["colCantidadPedidoSugerido"].Value != null)
                 {
-                    lCtlHijoSF.BackColor = gColorBarraOscura;
+                    int lIntCantidadSF = System.Convert.ToInt32(lFilaSF.Cells["colCantidadPedidoSugerido"].Value);
+                    if (lIntCantidadSF > 0)
+                    {
+                        lFilaSF.DefaultCellStyle.BackColor = Color.FromArgb(235, 247, 240);
+                    }
                 }
-                else if (lCtlHijoSF.Name == "lblEmpresa")
-                {
-                    lCtlHijoSF.Font = gFuenteEmpresa;
-                    lCtlHijoSF.ForeColor = gColorTextoClaro;
-                }
-                else if (lCtlHijoSF.Name == "txtEmpresa")
-                {
-                    lCtlHijoSF.Font = gFuenteEmpresa;
-                    lCtlHijoSF.ForeColor = gColorTextoOscuro;
-                }
-                else if (lCtlHijoSF.Name == "lblTitulo")
-                {
-                    lCtlHijoSF.Font = gFuenteTitulo;
-                }
-                else if (lCtlHijoSF is Button)
-                {
-                    EstilizarBoton((Button)lCtlHijoSF);
-                }
-                else if (lCtlHijoSF is DataGridView)
-                {
-                    EstilizarGrilla((DataGridView)lCtlHijoSF);
-                }
-
-                // Repite lo mismo con los controles que están dentro de este
-                EstilizarControles(lCtlHijoSF);
             }
-        }
-
-        private static void EstilizarBoton(Button pBtnBotonSF)
-        {
-            pBtnBotonSF.FlatStyle = FlatStyle.Flat;
-            pBtnBotonSF.FlatAppearance.BorderSize = 0;
-            pBtnBotonSF.BackColor = gColorBoton;
-            pBtnBotonSF.ForeColor = gColorTextoClaro;
-            pBtnBotonSF.Cursor = Cursors.Hand;
-        }
-
-        private static void EstilizarGrilla(DataGridView pGrdGrillaSF)
-        {
-            pGrdGrillaSF.BorderStyle = BorderStyle.None;
-            pGrdGrillaSF.BackgroundColor = gColorFondo;
-
-            // Sin esta línea Windows ignora los colores del encabezado
-            pGrdGrillaSF.EnableHeadersVisualStyles = false;
-            pGrdGrillaSF.ColumnHeadersDefaultCellStyle.BackColor = gColorBarraOscura;
-            pGrdGrillaSF.ColumnHeadersDefaultCellStyle.ForeColor = gColorTextoClaro;
-
-            pGrdGrillaSF.DefaultCellStyle.BackColor = Color.White;
-            pGrdGrillaSF.AlternatingRowsDefaultCellStyle.BackColor = gColorFilaAlterna;
         }
     }
 }

@@ -8,30 +8,22 @@ namespace CapaEntidadesSF
     /// </summary>
     public class clsOrdenCompraEN
     {
-        /// <summary>Número de la orden, lo asigna la base de datos.</summary>
         public int gIntIdOrden { get; set; }
-
-        /// <summary>Empresa que hace el pedido.</summary>
         public string gStrNombreEmpresa { get; set; }
-
-        /// <summary>Fecha usada para el análisis.</summary>
+        public DateTime gDteFechaOrden { get; set; }
         public DateTime gDteFechaAnalisis { get; set; }
-
-        /// <summary>Suma de todos los subtotales.</summary>
         public decimal gDecTotalAproximado { get; set; }
-
-        /// <summary>Productos que se van a pedir.</summary>
+        public string gStrEstado { get; set; }
         public List<clsPedidoSugeridoEN> gLstDetalles { get; set; }
 
-        /// <summary>
-        /// Constructor vacío, deja los valores iniciales.
-        /// </summary>
         public clsOrdenCompraEN()
         {
             this.gIntIdOrden = 0;
             this.gStrNombreEmpresa = "";
+            this.gDteFechaOrden = DateTime.Today;
             this.gDteFechaAnalisis = DateTime.Today;
             this.gDecTotalAproximado = 0;
+            this.gStrEstado = "Pendiente";
             this.gLstDetalles = new List<clsPedidoSugeridoEN>();
         }
     }

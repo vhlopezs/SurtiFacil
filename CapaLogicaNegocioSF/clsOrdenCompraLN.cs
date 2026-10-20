@@ -7,15 +7,13 @@ using CapaEntidadesSF;
 namespace CapaLogicaNegocioSF
 {
     /// <summary>
-    /// Arma y guarda la orden de compra.
+    /// Arma, guarda y gestiona las órdenes de compra.
     /// </summary>
     public class clsOrdenCompraLN
     {
         private clsConexionSQLSF gConexionSF = new clsConexionSQLSF();
+        private clsAccesoDatosSF gAccesoSF = new clsAccesoDatosSF();
 
-        /// <summary>
-        /// Arma la orden solo con los productos que tienen cantidad mayor a cero.
-        /// </summary>
         public clsOrdenCompraEN CrearOrden(string pStrNombreEmpresaSF, DateTime pDteFechaAnalisisSF,
                                            List<clsPedidoSugeridoEN> pLstPedidoSF)
         {
@@ -36,10 +34,6 @@ namespace CapaLogicaNegocioSF
             return lEntOrdenSF;
         }
 
-        /// <summary>
-        /// Guarda el encabezado y los productos en una sola transacción.
-        /// Devuelve el número de la orden.
-        /// </summary>
         public int GuardarOrden(clsOrdenCompraEN pEntOrdenSF)
         {
             if (pEntOrdenSF.gLstDetalles.Count == 0)
@@ -50,15 +44,12 @@ namespace CapaLogicaNegocioSF
             using (SqlConnection lSqlConexionSF = gConexionSF.CrearConexion())
             {
                 lSqlConexionSF.Open();
-
-                // La transacción guarda todo o no guarda nada
                 SqlTransaction lSqlTransaccionSF = lSqlConexionSF.BeginTransaction();
 
                 try
                 {
                     int lIntIdOrdenSF = 0;
 
-                    // Primero el encabezado
                     using (SqlCommand lSqlComandoSF = new SqlCommand(
                         "spInsertarOrdenCompra", lSqlConexionSF, lSqlTransaccionSF))
                     {
@@ -69,7 +60,6 @@ namespace CapaLogicaNegocioSF
                         lIntIdOrdenSF = Convert.ToInt32(lSqlComandoSF.ExecuteScalar());
                     }
 
-                    // Después cada producto de la orden
                     foreach (clsPedidoSugeridoEN lEntDetalleSF in pEntOrdenSF.gLstDetalles)
                     {
                         using (SqlCommand lSqlComandoDetalleSF = new SqlCommand(
@@ -86,15 +76,65 @@ namespace CapaLogicaNegocioSF
                     }
 
                     lSqlTransaccionSF.Commit();
+                    pEntOrdenSF.gIntIdOrden = lIntIdOrdenSF;
                     return lIntIdOrdenSF;
                 }
                 catch
                 {
-                    // Si algo falla se deshace todo
                     lSqlTransaccionSF.Rollback();
                     throw;
                 }
             }
+        }
+
+        public List<clsOrdenCompraEN> ListarOrdenes()
+        {
+            List<clsOrdenCompraEN> lLstOrdenesSF = new List<clsOrdenCompraEN>();
+            DataTable lTblDatosSF = gAccesoSF.ConsultarTabla("spListarOrdenes");
+
+            foreach (DataRow lFilaSF in lTblDatosSF.Rows)
+            {
+                clsOrdenCompraEN lEntOrdenSF = new clsOrdenCompraEN();
+                lEntOrdenSF.gIntIdOrden = Convert.ToInt32(lFilaSF["IdOrden"]);
+                lEntOrdenSF.gStrNombreEmpresa = lFilaSF["NombreEmpresa"].ToString();
+                lEntOrdenSF.gDteFechaOrden = Convert.ToDateTime(lFilaSF["FechaOrden"]);
+                lEntOrdenSF.gDteFechaAnalisis = Convert.ToDateTime(lFilaSF["FechaAnalisis"]);
+                lEntOrdenSF.gDecTotalAproximado = Convert.ToDecimal(lFilaSF["TotalAproximado"]);
+                lEntOrdenSF.gStrEstado = lFilaSF["Estado"].ToString();
+                lLstOrdenesSF.Add(lEntOrdenSF);
+            }
+
+            return lLstOrdenesSF;
+        }
+
+        public List<clsPedidoSugeridoEN> ObtenerDetalle(int pIntIdOrdenSF)
+        {
+            List<clsPedidoSugeridoEN> lLstDetalleSF = new List<clsPedidoSugeridoEN>();
+            DataTable lTblDatosSF = gAccesoSF.ConsultarTabla("spObtenerDetalleOrden",
+                new SqlParameter("@IdOrden", pIntIdOrdenSF));
+
+            foreach (DataRow lFilaSF in lTblDatosSF.Rows)
+            {
+                clsPedidoSugeridoEN lEntDetalleSF = new clsPedidoSugeridoEN();
+                lEntDetalleSF.gIntIdProducto = Convert.ToInt32(lFilaSF["IdProducto"]);
+                lEntDetalleSF.gStrNombreProducto = lFilaSF["Nombre"].ToString();
+                lEntDetalleSF.gIntCantidadPedidoSugerido = Convert.ToInt32(lFilaSF["CantidadSugerida"]);
+                lEntDetalleSF.gDecCostoUnitario = Convert.ToDecimal(lFilaSF["CostoUnitario"]);
+                lEntDetalleSF.gDecSubtotalSugerido = Convert.ToDecimal(lFilaSF["Subtotal"]);
+                lLstDetalleSF.Add(lEntDetalleSF);
+            }
+
+            return lLstDetalleSF;
+        }
+
+        public void EliminarOrden(int pIntIdOrdenSF)
+        {
+            gAccesoSF.EjecutarSinResultado("spEliminarOrden", new SqlParameter("@IdOrden", pIntIdOrdenSF));
+        }
+
+        public void RecibirOrden(int pIntIdOrdenSF)
+        {
+            gAccesoSF.EjecutarSinResultado("spRecibirOrden", new SqlParameter("@IdOrden", pIntIdOrdenSF));
         }
     }
 }
