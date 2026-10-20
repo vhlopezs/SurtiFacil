@@ -2,6 +2,14 @@
 
 Proyecto académico desarrollado en C# (.NET) y SQL Server Express estructurado en 3 capas.
 
+## Estructura del Diseño
+
+El diseño de la interfaz visual se encuentra construido por código (sin diseñador drag-and-drop de VS) para permitir mantenibilidad y adaptabilidad modular:
+
+- **Colores y Fuentes:** Modificar la clase `clsEstilosSF.cs` en la capa de presentación.
+- **Estructura y Controles:** Modificar la clase parcial `frmPedidoSugeridoSF.Diseno.cs`.
+- **Lógica de Interfaz y Eventos:** Modificar la clase parcial `frmPedidoSugeridoSF.cs`.
+
 ## Requisitos de Entorno
 
 1. SQL Server / SQL Express ejecutándose en localhost.
@@ -21,3 +29,4 @@ BEGIN
     DROP DATABASE SurtiFacilDB;
 END
 GO
+
